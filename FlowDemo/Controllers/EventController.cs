@@ -55,4 +55,10 @@ public class EventController : ControllerBase
         return _eventService.GetEventsNearFuture(queryTime);
     }
 
+    [HttpGet("getEventsByTimeTag")]
+    public ActionResult<List<EventItem>> GetEventsByTimeTag(string timeTag)
+    {
+        return _eventService.GetEventsByTimeTag(timeTag);
+    }
+
 }

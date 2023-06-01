@@ -13,4 +13,5 @@ public interface IEventService
     EventItem SaveEvent(EventItem eventItem);
     List<EventItem> GetEventsByCategoryList(List<int> categories);
     List<EventItem> GetEventsNearFuture(DateTime startTime);
+    List<EventItem> GetEventsByTimeTag(string tag);
 }

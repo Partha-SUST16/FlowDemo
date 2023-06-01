@@ -43,8 +43,8 @@ public class EventService : IEventService
 
     public List<EventItem> GetEventsByTime(DateTime startTime, DateTime endTime)
     {
-        startTime = startTime.ToUniversalTime();
-        endTime = endTime.ToUniversalTime();
+        // startTime = startTime.ToUniversalTime();
+        // endTime = endTime.ToUniversalTime();
         var allEvents = _dbService.GetAll();
         var eventItems = allEvents.Where(item => item.StartTime >= startTime && item.EndTime <= endTime);
         return eventItems.ToList();
@@ -69,8 +69,8 @@ public class EventService : IEventService
     public EventItem SaveEvent(EventItem eventItem)
     {
         if (eventItem == null) return null;
-        eventItem.StartTime = eventItem.StartTime.ToUniversalTime();
-        eventItem.EndTime = eventItem.EndTime.ToUniversalTime();
+        // eventItem.StartTime = eventItem.StartTime.ToUniversalTime();
+        // eventItem.EndTime = eventItem.EndTime.ToUniversalTime();
         eventItem.GeoHash = GetGeoHash(eventItem.Latitude, eventItem.Longitude);
         return _dbService.Save(eventItem);
     }
@@ -90,6 +90,70 @@ public class EventService : IEventService
         return futureEvents;
     }
 
+    public List<EventItem> GetEventsByTimeTag(string tag)
+    {
+        if (string.IsNullOrEmpty(tag))
+            throw new ArgumentException("Time Tag can not be Empty or null");
+        var timeRange = _timeService.GetTimeRangeFromTimeQueryTag(tag);
+        if (timeRange.Item2 != DateTime.MinValue)
+        {
+            return GetEventsByTime(timeRange.Item1, timeRange.Item2);
+        }
+        var allEvents = _dbService.GetAll();
+        var liveEvents =  allEvents.Where(item => item.StartTime <= timeRange.Item1 && item.EndTime >= timeRange.Item1);
+        return liveEvents.ToList();
+    }
+
+    public void ChangeTimeTagForEvents(DateTime today)
+    {
+        if (today == DateTime.MinValue) return;
+        var todaysEvents = GetAllEventsByStartDate(today);
+        ChangeTimeTagForTodaysEvents(todaysEvents, today);
+        var tomorrowsEvents = GetAllEventsByStartDate(today.AddDays(1));
+        ChangeAndSaveTimeTag(QueryTimeTag.TOMORROW.ToString(), tomorrowsEvents);
+        var previousDaysEvents = GetAllEventsByStartDate(today.AddDays(-1));
+        ChangeAndSaveTimeTag(QueryTimeTag.PAST.ToString(), previousDaysEvents);
+        var weekendTimeRange = _timeService.GetTimeRangeFromTimeQueryTag(QueryTimeTag.WEEKEND.ToString());
+        var weekendEvents = GetEventsByTime(weekendTimeRange.Item1, weekendTimeRange.Item2);
+        ChangeAndSaveTimeTag(QueryTimeTag.WEEKEND.ToString(), weekendEvents);
+    }
+
+    private void ChangeTimeTagForTodaysEvents(List<EventItem> todaysEvents, DateTime today)
+    {
+        var morningTimeRange = _timeService.GetTimeRangeFromTimeQueryTag(QueryTimeTag.MORNING.ToString());//new Tuple<DateTime, DateTime>(today.Date.AddHours(6), today.Date.AddHours(12));
+        FilterAndUpdateEventTimeTag(todaysEvents, morningTimeRange, QueryTimeTag.MORNING.ToString());
+        var afterNoonTimeRange = _timeService.GetTimeRangeFromTimeQueryTag(QueryTimeTag.AFTERNOON.ToString());
+        FilterAndUpdateEventTimeTag(todaysEvents, afterNoonTimeRange, QueryTimeTag.AFTERNOON.ToString());
+        var eveningTimeRange = _timeService.GetTimeRangeFromTimeQueryTag(QueryTimeTag.EVENING.ToString());
+        FilterAndUpdateEventTimeTag(todaysEvents, eveningTimeRange, QueryTimeTag.EVENING.ToString());
+        var nightTimeRange = _timeService.GetTimeRangeFromTimeQueryTag(QueryTimeTag.NIGHT.ToString());
+        FilterAndUpdateEventTimeTag(todaysEvents, nightTimeRange, QueryTimeTag.NIGHT.ToString());
+    }
+
+    private void FilterAndUpdateEventTimeTag(List<EventItem> todaysEvents, Tuple<DateTime, DateTime> timeRange, string timeTag)
+    {
+        var filteredEvents = todaysEvents.Where(item =>
+            (item.StartTime >= timeRange.Item1 && item.StartTime <= timeRange.Item2)|| 
+            (item.EndTime >= timeRange.Item1 && item.EndTime <= timeRange.Item2));
+        ChangeAndSaveTimeTag(timeTag, filteredEvents);
+    }
+
+    private void ChangeAndSaveTimeTag(string timeTag, IEnumerable<EventItem> filteredEvents)
+    {
+        foreach (var eventItem in filteredEvents)
+        {
+            eventItem.TimeTag = timeTag;
+            _dbService.Save(eventItem);
+        }
+    }
+
+    private List<EventItem> GetAllEventsByStartDate(DateTime today)
+    {
+        DateTime todaysStartTime = today.Date;
+        DateTime todaysLastTime = todaysStartTime.AddDays(1).AddTicks(-1);
+        var allEvents = _dbService.GetAll();
+        return allEvents.Where(item => item.StartTime >= todaysStartTime && item.StartTime <= todaysLastTime).ToList();
+    }
     private string GetGeoHash(double latitude, double longitude)
     {
         return _geohasher.Encode(latitude, longitude, GEOHASH_PRECISION);

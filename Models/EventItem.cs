@@ -12,5 +12,6 @@ public class EventItem
     public string GeoHash { get; set; }
     public EventType EventType { get; set; }
     public bool IsOpenForEveryOne { get; set; }
+    public string TimeTag;
     public Creator Creator { get; set; }
 }
