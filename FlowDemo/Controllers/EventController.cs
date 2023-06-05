@@ -12,26 +12,26 @@ public class EventController : ControllerBase
     {
         _eventService = eventService;
     }
-
-    [HttpGet("getEventItem")]
+    
+    [HttpGet]
     public ActionResult<EventItem> GetEventItemById(string id)
     {
         return _eventService.GetEventById(id);
     }
 
-    [HttpPost("saveItem")]
+    [HttpPost("save")]
     public ActionResult<EventItem> SaveEventItem(EventItem item)
     {
         return _eventService.SaveEvent(item);
     }
 
-    [HttpGet("getEventsByDate")]
+    [HttpGet("getByDate")]
     public ActionResult<List<EventItem>> GetEventListByDate(DateTime startTime, DateTime endTime)
     {
         return _eventService.GetEventsByTime(startTime, endTime);
     }
 
-    [HttpGet("getEventsByLocation")]
+    [HttpGet("getByLocation")]
     public ActionResult<List<EventItem>> GetEventsByLocation(double lat, double lon, int type = -1)
     {
         return _eventService.GetEventsNearUser(lat, lon, type);
@@ -43,7 +43,7 @@ public class EventController : ControllerBase
         return _eventService.GetTopEvents(date);
     }
 
-    [HttpPost("getEventsByCategory")]
+    [HttpPost("getByCategory")]
     public ActionResult<List<EventItem>> GetEventsByCategories(List<int> categories)
     {
         return _eventService.GetEventsByCategoryList(categories);
@@ -55,7 +55,7 @@ public class EventController : ControllerBase
         return _eventService.GetEventsNearFuture(queryTime);
     }
 
-    [HttpGet("getEventsByTimeTag")]
+    [HttpGet("getByTimeTag")]
     public ActionResult<List<EventItem>> GetEventsByTimeTag(string timeTag)
     {
         return _eventService.GetEventsByTimeTag(timeTag);
