@@ -1,6 +1,7 @@
 using Business.Interfaces;
 using Geohash;
 using Models;
+using Models.Dtos;
 
 namespace Business.Services;
 
@@ -66,12 +67,22 @@ public class EventService : IEventService
         throw new NotImplementedException();
     }
 
-    public EventItem SaveEvent(EventItem eventItem)
+    public EventItem SaveEvent(EventItemDto eventItemDto)
     {
-        if (eventItem == null) return null;
-        // eventItem.StartTime = eventItem.StartTime.ToUniversalTime();
-        // eventItem.EndTime = eventItem.EndTime.ToUniversalTime();
-        eventItem.GeoHash = GetGeoHash(eventItem.Latitude, eventItem.Longitude);
+        if (eventItemDto == null) return null;
+        if (string.IsNullOrEmpty(eventItemDto.Id))
+            eventItemDto.Id = Guid.NewGuid().ToString();
+        var creator = new Creator(eventItemDto.Creator.FirstName, eventItemDto.Creator.LastName,
+            eventItemDto.Creator.Email);
+        var eventItem = new EventItem(eventItemDto.Id,
+                                        eventItemDto.Description,
+                                        eventItemDto.Latitude,
+                                        eventItemDto.Longitude,
+                                        eventItemDto.StartTime,
+                                        eventItemDto.EndTime,
+                                        eventItemDto.EventType,
+                                        creator);
+        eventItem.SetGeoHash(GetGeoHash(eventItemDto.Latitude, eventItemDto.Longitude));
         return _dbService.Save(eventItem);
     }
 
@@ -142,7 +153,7 @@ public class EventService : IEventService
     {
         foreach (var eventItem in filteredEvents)
         {
-            eventItem.TimeTag = timeTag;
+            eventItem.UpdateTimeTag(timeTag);
             _dbService.Save(eventItem);
         }
     }

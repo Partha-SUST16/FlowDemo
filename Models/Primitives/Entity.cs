@@ -2,7 +2,7 @@ namespace Models.Primitives;
 
 public abstract class Entity : IEquatable<Entity>
 {
-    protected string Id { get; private init; }
+    public string Id { get; private init; }
     
     protected Entity(string id)
     {

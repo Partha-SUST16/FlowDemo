@@ -1,6 +1,7 @@
 using Business.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 using Models;
+using Models.Dtos;
 
 namespace FlowDemo.Controllers;
 [ApiController]
@@ -20,7 +21,7 @@ public class EventController : ControllerBase
     }
 
     [HttpPost("save")]
-    public ActionResult<EventItem> SaveEventItem(EventItem item)
+    public ActionResult<EventItem> SaveEventItem(EventItemDto item)
     {
         return _eventService.SaveEvent(item);
     }

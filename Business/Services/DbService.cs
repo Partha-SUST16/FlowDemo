@@ -15,7 +15,7 @@ public class DbService : IDbService
     {
         if (item == null) return null;
         if (string.IsNullOrEmpty(item.Id))
-            item.Id = Convert.ToString(Collections.Count + 1);
+            return null;
         Collections.Add(item);
         return item;
     }
