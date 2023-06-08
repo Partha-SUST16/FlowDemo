@@ -9,8 +9,8 @@ using Models.Event;
 
 var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(Assembly.GetExecutingAssembly()));
-builder.Services.AddTransient<INotificationHandler<UpdateTimeTagEvent>, UpdateTimeTagEventHandler>();
-builder.Services.AddTransient<INotificationHandler<SetGeoHashEvent>, SetGeoHashEventHandler>();
+// builder.Services.AddTransient<INotificationHandler<UpdateTimeTagEvent>, UpdateTimeTagEventHandler>();
+// builder.Services.AddTransient<INotificationHandler<SetGeoHashEvent>, SetGeoHashEventHandler>();
 
 ServiceLocator.SetLocatorProvider(builder.Services.BuildServiceProvider());
 DomainEvents.Mediator = () => ServiceLocator.Current.GetInstance<IMediator>();
