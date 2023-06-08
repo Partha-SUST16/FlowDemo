@@ -1,4 +1,5 @@
-﻿using Models.Primitives;
+﻿using Models.Event;
+using Models.Primitives;
 
 namespace Models;
 
@@ -36,11 +37,14 @@ public class EventItem : Entity
 
     public void UpdateTimeTag(string tag)
     {
+        DomainEvents.Raise(new UpdateTimeTagEvent(Id, tag, TimeTag));
+
         TimeTag = tag;
     }
 
     public void SetGeoHash(string hashValue)
     {
+        DomainEvents.Raise(new SetGeoHashEvent(Id, Latitude, Longitude, hashValue));
         GeoHash = hashValue;
     }
 }

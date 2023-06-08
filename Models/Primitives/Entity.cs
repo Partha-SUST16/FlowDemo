@@ -9,6 +9,11 @@ public abstract class Entity : IEquatable<Entity>
         Id = id;
     }
 
+    protected Entity() : this(Guid.NewGuid().ToString())
+    {
+        
+    }
+
     public static bool operator ==(Entity? first, Entity? second)
     {
         return first is not null && second is not null && first.Equals(second);
